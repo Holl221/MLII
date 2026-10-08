@@ -54,7 +54,15 @@ copy .env.example .env
 
 Откройте `.env` и впишите свои API-ключи. Этот файл не попадает в git.
 
-### 5. Проверьте, что всё работает
+### 5. Подготовьте учебные датасеты
+
+```powershell
+python scripts\prepare_datasets.py
+```
+
+Скрипт скачает Titanic и California Housing и сгенерирует датасет с ловушками в папку `data/`.
+
+### 6. Проверьте, что всё работает
 
 ```powershell
 python -m pytest
@@ -67,6 +75,13 @@ src/            код агента (7 модулей)
 data/           датасеты CSV (не в git)
 experiments/    результаты и отчёты (не в git)
 tests/          тесты
+scripts/        вспомогательные скрипты (подготовка данных)
+```
+
+## Анализ датасета
+
+```powershell
+python -m src.data_profiler data\titanic.csv Survived
 ```
 
 Подробное описание архитектуры — в [CLAUDE.md](CLAUDE.md).

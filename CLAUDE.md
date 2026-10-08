@@ -24,7 +24,7 @@
 
 | № | Модуль | Назначение |
 |---|--------|------------|
-| 1 | `data_profiler.py` | Анализ датасета: типы колонок, пропуски, тип задачи |
+| 1 | `data_profiler.py` | Анализ датасета: тип задачи, типы столбцов, ID/константы/утечки ✅ |
 | 2 | `baseline.py` | Базовая модель через LightAutoML и её метрика |
 | 3 | `llm_client.py` | Обёртка над LLM; провайдер задаётся в `.env` (`LLM_PROVIDER`) |
 | 4 | `agent.py` | Цикл «подумать → написать код → запустить → оценить → улучшить» |
@@ -33,7 +33,11 @@
 | 7 | `report.py` | Итоговый отчёт в `experiments/` |
 
 Другие папки:
-- `data/` — датасеты (не попадают в git).
+- `data/` — датасеты (не попадают в git). Создаются скриптом
+  `.\.venv\Scripts\python.exe scripts\prepare_datasets.py`:
+  `titanic.csv` (цель `Survived`), `housing.csv` (цель `MedHouseVal`),
+  `synthetic.csv` (цель `default`, с ловушками: `client_id`, `country`, `collection_calls`).
+- `scripts/` — вспомогательные скрипты (подготовка данных).
 - `experiments/` — результаты запусков и отчёты (не попадают в git).
 - `tests/` — тесты pytest.
 
@@ -55,3 +59,16 @@
   установлены и закреплены зависимости (проверено: LightAutoML
   обучается на тестовом датасете), `.env.example`, `.gitignore`, README с инструкцией
   для Windows, тест на импорт всех модулей.
+
+- **Этап 1 — data_profiler (2026-10-08).** `profile_dataset(csv, target)` возвращает
+  словарь-профиль, `profile_to_text(profile)` — краткий текст на русском для LLM.
+  Запуск из консоли: `.\.venv\Scripts\python.exe -m src.data_profiler data\titanic.csv Survived`.
+  - Тип задачи: ≤2 значения → binary; строки или целые с ≤20 значениями → multiclass;
+    иначе regression.
+  - Типы столбцов: number / category / date (по шаблону даты) / text (≥3 слов и
+    ≥50% уникальных).
+  - ID: целые подряд без пропусков, имя вида `id`/`*_id`/`*Id`, или все строки уникальны.
+  - Утечка: дерево решений на одном столбце, кросс-валидация на 3 фолдах; порог 0.95
+    (сбалансированная точность для классификации, R² для регрессии). Даты и тексты
+    не проверяются.
+  - Скрипт `scripts/prepare_datasets.py` и 14 тестов в `tests/test_data_profiler.py`.
