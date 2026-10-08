@@ -1,0 +1,21 @@
+# Секреты (API-ключи). В git кладём только .env.example
+.env
+
+# Виртуальное окружение
+.venv/
+
+# Данные и результаты экспериментов (могут быть большими или приватными)
+data/*
+!data/.gitkeep
+experiments/*
+!experiments/.gitkeep
+
+# Служебные файлы Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Редакторы и ОС
+.vscode/
+.idea/
+Thumbs.db
